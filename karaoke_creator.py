@@ -1,30 +1,68 @@
 from transcription import Transcription
 from sync_subtitles import SyncSubtitles
-# Importe outras bibliotecas necessárias
+from pytube import YouTube
+from moviepy.editor import VideoFileClip
+from spleeter.separator import Separator
+import os
+import logging
 
-class KaraokeCreator:
-    def __init__(self, youtube_link):
-        self.youtube_link = youtube_link
-        self.transcription = Transcription()
-        self.sync_subtitles = SyncSubtitles()
+path = '../KaraokeVideos/'
+audiopath = '../KaraokeAudios/'
 
-    def baixar_video(self):
+#class KaraokeCreator:
+#    def __init__(self, youtube_link):
+#        self.youtube_url = youtube_url
+#        self.transcription = Transcription()
+#        self.sync_subtitles = SyncSubtitles()
+
+#    def baixar_video(youtube_url, path):
         # Lógica para baixar o vídeo
-        pass
+#        yt = YouTube(youtube_url)
+#        video = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+#        video.download(output_path=path)
+#        print(f'Download completed of {video.title}')
+#        title = video.title
+#        return title
 
-    def extrair_audio(self):
-        # Lógica para extrair o áudio
-        pass
+def extrair_audio(title):
+    # Cria um objeto VideoFileClip para o vídeo
+    video_clip = VideoFileClip(os.path.join(path, title + '.mp4'))
 
-    def remover_vocais(self):
-        # Lógica para remover os vocais
-        pass
+    # Define o caminho do arquivo de áudio extraído
+    audio_file = os.path.join(audiopath, title + '.mp3')
 
-    def criar_karaoke(self):
-        self.baixar_video()
-        self.extrair_audio()
-        self.remover_vocais()
-        texto_transcrito = self.transcription.transcrever_audio(self.audio_file)
-        self.sync_subtitles.sincronizar_legendas(self.audio_file, texto_transcrito)
+    # Extrai o áudio do vídeo e salva no caminho especificado
+    video_clip.audio.write_audiofile(audio_file)
+
+    print(f'Audio extracted and saved in: {audio_file}')
+    return audio_file
+
+def remover_vocais(audio_file):
+    print('Initializing vocal video removal')
+    # Verifica se o arquivo de áudio existe
+    if not os.path.exists(audio_file):
+        raise ValueError("Audio not found. Please check the file path.")
+
+    # Cria uma instância do Separator com a configuração de 2 stems (vocais e acompanhamento)
+    separator = Separator('spleeter:2stems')
+
+    # Extrai os vocais e o acompanhamento do áudio e salva no caminho especificado
+    logging.getLogger('spleeter').setLevel(logging.INFO)
+    separator.separate_to_file(audio_file, audiopath)
+    logging.getLogger('spleeter').setLevel(logging.INFO)
+
+    print(f'Vocais removidos e acompanhamento salvo em: {audiopath}')
+
+# Exemplo de uso
+title = 'Home'
+audio_file = extrair_audio(title)
+remover_vocais(audio_file)
+
+    #def criar_karaoke(self):
+    #    self.baixar_video()
+    #    self.extrair_audio()
+    #    self.remover_vocais()
+    #    texto_transcrito = self.transcription.transcrever_audio(self.audio_file)
+    #    self.sync_subtitles.sincronizar_legendas(self.audio_file, texto_transcrito)
         # Lógica para criar o vídeo de karaokê
-        pass
+    #    pass
