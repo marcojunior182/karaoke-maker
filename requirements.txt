@@ -1,7 +1,11 @@
 numpy
+poetry
 pytube
 moviepy
 moviepy
 spleeter
 assemblyai
 aeneas
+tomli<2.0.0
+SpeechRecognition
+pydub
