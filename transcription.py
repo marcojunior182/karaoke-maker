@@ -1,5 +1,12 @@
 import speech_recognition as sr
+import whisper
+from langdetect import detect
 
+# Function to create and open a txt file
+def create_and_open_txt(text, filename):
+    # Create and write the text to a txt file
+    with open(filename, "w") as file:
+        file.write(text)
 
 class Transcription:
     def __init__(self):
@@ -8,22 +15,20 @@ class Transcription:
 
     def transcrever_audio(self, audio_file):
         # Carrega o arquivo de áudio
-        audio = sr.AudioFile(audio_file)
-        with audio as source:
-            audio = r.record(source)
+        model = whisper.load_model("base")
+        result = model.transcribe(audio_file)
+        transcribed_text = result["text"]
+        print(transcribed_text)
 
-        try:
-            # Usa o reconhecedor para transcrever o áudio
-            text = self.recognizer.recognize_google(audio)
-            return text
-        except sr.UnknownValueError:
-            # Caso o áudio não seja reconhecido
-            return "Não foi possível entender o áudio"
-        except sr.RequestError as e:
-            # Caso ocorra um erro na requisição ao serviço de reconhecimento
-            return f"Erro na requisição ao serviço de reconhecimento: {e}"
+        # Detect the language
+        language = detect(transcribed_text)
+        print(f"Detected language: {language}")
+
+        # Create and open a txt file with the text
+        create_and_open_txt(transcribed_text, f"output_{language}.txt")
+
+        return transcribed_text
 
 # Exemplo de uso
-transcription = Transcription()
-texto_transcrito = transcription.transcrever_audio("../KaraokeAudios/Home.wav")
-print(texto_transcrito)
+#transcription = Transcription()
+#texto_transcrito = transcription.transcrever_audio("KaraokeAudios/Home.mp3")
